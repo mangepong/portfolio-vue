@@ -30,6 +30,7 @@
 
 body {
   background-image: url("assets/img/background.jpg");
+  /* position: fixed; */
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
