@@ -27,12 +27,28 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/Github.vue')
   },
   {
+    path: '/stream',
+    name: 'Stream',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Stream.vue')
+  },
+  {
     path: '/test',
     name: 'Test',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/Test.vue')
+  },
+  {
+    path: '/p2p',
+    name: 'P2P',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/P2P.vue')
   },
   {
     path: '/jobs/:job',

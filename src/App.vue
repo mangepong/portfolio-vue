@@ -14,6 +14,12 @@
             <li class="nav-item">
               <router-link class="navbar-brand" to="/test">Test</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="navbar-brand" to="/stream">Stream</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="navbar-brand" to="/p2p">P2P</router-link>
+            </li>
         </ul>
         </div>
       </div>
@@ -27,6 +33,7 @@
 
 <style>
  @import './assets/css/style.css';
+ @import './assets/css/video-js.css';
 
 body {
   background-image: url("assets/img/background.jpg");
