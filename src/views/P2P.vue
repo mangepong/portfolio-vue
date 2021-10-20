@@ -93,6 +93,7 @@ export default {
         this.activeCamera = !this.activeCamera
       } else {
         console.log("AV")
+        this.$refs.p2p.startCamera()
         this.activeCamera = !this.activeCamera
       }
     },

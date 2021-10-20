@@ -52,6 +52,7 @@ export default {
       canvas: null,
       socket: null,
       cameraList: [],
+      cameraID: null
     };
   },
   props: {
@@ -195,6 +196,7 @@ export default {
           stream: stream,
           isLocal: isLocal,
         };
+        this.cameraID = stream.id;
         that.cameraList.push(video);
         this.activeCamera = true;
       }
@@ -209,10 +211,31 @@ export default {
       that.$emit("joined-room", stream.id);
     },
     stopCamera() {
-      this.cameraList.forEach((v) =>
-        v.stream.getTracks().forEach((t) => t.stop())
+      let x = 0;
+      this.cameraList.forEach((v) => {
+          if(v.id == this.cameraID) {
+            v.stream.getTracks().forEach((t) => t.stop())
+            console.log(this.cameraList[x])
+            this.cameraList.splice(x, 1)
+          }
+          x+=1;
+        }
       );
-      this.cameraList = [];
+    },
+    async startCamera() {
+      let constraints = {
+        video: this.enableVideo,
+        audio: this.enableAudio,
+      };
+      if (this.deviceId && this.enableVideo) {
+        constraints.video = { deviceId: { exact: this.deviceId } };
+      }
+
+      const localStream = await navigator.mediaDevices.getUserMedia(
+        constraints
+      );
+      this.log("opened", localStream);
+      this.joinedRoom(localStream, true);
     },
     leave() {
       this.videoList.forEach((v) =>
