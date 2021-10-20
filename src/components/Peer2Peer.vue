@@ -159,61 +159,6 @@ export default {
       });
       this.signalClient.discover(that.roomId);
     },
-    // async join() {
-    //   var that = this;
-    //   this.log("join");
-    //   this.socket = io(this.socketURL, {
-    //     rejectUnauthorized: false,
-    //     transports: ["websocket"],
-    //   });
-    //   this.signalClient = new SimpleSignalClient(this.socket);
-    //   let constraints = {
-    //     video: that.enableVideo,
-    //     audio: that.enableAudio,
-    //   };
-    //   if (that.deviceId && that.enableVideo) {
-    //     constraints.video = { deviceId: { exact: that.deviceId } };
-    //   }
-    //   const localStream = await navigator.mediaDevices.getUserMedia(
-    //     constraints
-    //   );
-    //   this.log("opened", localStream);
-    //   this.joinedRoom(localStream, true);
-    //   this.signalClient.once("discover", (discoveryData) => {
-    //     that.log("discovered", discoveryData);
-    //     async function connectToPeer(peerID) {
-    //       if (peerID == that.socket.id) return;
-    //       try {
-    //         that.log("Connecting to peer");
-    //         const { peer } = await that.signalClient.connect(
-    //           peerID,
-    //           that.roomId,
-    //           that.peerOptions
-    //         );
-    //         that.videoList.forEach((v) => {
-    //           if (v.isLocal) {
-    //             that.onPeer(peer, v.stream);
-    //           }
-    //         });
-    //       } catch (e) {
-    //         that.log("Error connecting to peer");
-    //       }
-    //     }
-    //     discoveryData.peers.forEach((peerID) => connectToPeer(peerID));
-    //     that.$emit("opened-room", that.roomId);
-    //   });
-    //   this.signalClient.on("request", async (request) => {
-    //     that.log("requested", request);
-    //     const { peer } = await request.accept({}, that.peerOptions);
-    //     that.log("accepted", peer);
-    //     that.videoList.forEach((v) => {
-    //       if (v.isLocal) {
-    //         that.onPeer(peer, v.stream);
-    //       }
-    //     });
-    //   });
-    //   this.signalClient.discover(that.roomId);
-    // },
     onPeer(peer, localStream) {
       var that = this;
       that.log("onPeer");
@@ -235,30 +180,6 @@ export default {
         });
       });
     },
-    // joinedRoom(stream, isLocal) {
-    //   var that = this;
-    //   let found = that.videoList.find((video) => {
-    //     return video.id === stream.id;
-    //   });
-    //   if (found === undefined) {
-    //     let video = {
-    //       id: stream.id,
-    //       muted: isLocal,
-    //       stream: stream,
-    //       isLocal: isLocal,
-    //     };
-    //     that.videoList.push(video);
-    //   }
-    //   setTimeout(function() {
-    //     for (var i = 0, len = that.$refs.videos.length; i < len; i++) {
-    //       if (that.$refs.videos[i].id === stream.id) {
-    //         that.$refs.videos[i].srcObject = stream;
-    //         break;
-    //       }
-    //     }
-    //   }, 500);
-    //   that.$emit("joined-room", stream.id);
-    // },
     joinedRoom(stream, isLocal) {
       var that = this;
       let found = that.cameraList.find((video) => {
@@ -287,7 +208,11 @@ export default {
       this.videoList.forEach((v) =>
         v.stream.getTracks().forEach((t) => t.stop())
       );
+      this.cameraList.forEach((v) =>
+        v.stream.getTracks().forEach((t) => t.stop())
+      );
       this.videoList = [];
+      this.cameraList = [];
       this.signalClient.peers().forEach((peer) => peer.removeAllListeners());
       this.signalClient.destroy();
       this.signalClient = null;
