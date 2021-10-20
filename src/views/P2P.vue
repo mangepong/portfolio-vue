@@ -9,7 +9,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="">
-          <vue-webrtc ref="webrtc"
+          <p2p ref="p2p"
                       width="100%"
                       :roomId="roomId"
                       :enableAudio="true"
@@ -43,10 +43,10 @@
 
 <script>
 // @ is an alias to /src
-
+import p2p from '@/components/Peer2Peer.vue'
 export default {
   name: "Home",
-  components: {},
+  components: {p2p},
   data() {
       return {
         img: null,
@@ -55,17 +55,17 @@ export default {
     },
   methods: {
     onCapture() {
-        this.img = this.$refs.webrtc.capture();
+        this.img = this.$refs.p2p.capture();
       },
       onJoin() {
-        this.$refs.webrtc.join();
+        this.$refs.p2p.join();
       },
       onLeave() {
-        this.$refs.webrtc.leave();
+        this.$refs.p2p.leave();
       },
       onShareScreen() {
-        this.img = this.$refs.webrtc.shareScreen();
-      },
+        this.img = this.$refs.p2p.shareScreen();
+      }, 
       onError(error, stream) {
         console.log('On Error Event', error, stream);
       },
