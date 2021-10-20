@@ -12,7 +12,7 @@
           playsinline
           ref="cameras"
           :height="cameraHeight"
-          :muted="item.muted"
+          :muted="muted"
           :id="item.id"
         ></video>
       </div>
@@ -41,8 +41,7 @@
 <script>
 import { io } from "socket.io-client";
 import SimpleSignalClient from "simple-signal-client";
-// const io = require("socket.io-client");
-// const SimpleSignalClient = require('simple-signal-client');
+
 export default {
   name: "p2p",
   components: {},
@@ -52,7 +51,7 @@ export default {
       videoList: [],
       canvas: null,
       socket: null,
-      cameraList: []
+      cameraList: [],
     };
   },
   props: {
@@ -100,6 +99,10 @@ export default {
       type: String,
       default: null,
     },
+    muted: {
+      type: Boolean,
+      default: false
+    }
   },
   watch: {},
   mounted() {},
@@ -188,11 +191,12 @@ export default {
       if (found === undefined) {
         let video = {
           id: stream.id,
-          muted: isLocal,
+          muted: this.muted,
           stream: stream,
           isLocal: isLocal,
         };
         that.cameraList.push(video);
+        this.activeCamera = true;
       }
       setTimeout(function() {
         for (var i = 0, len = that.$refs.cameras.length; i < len; i++) {
@@ -203,6 +207,12 @@ export default {
         }
       }, 500);
       that.$emit("joined-room", stream.id);
+    },
+    stopCamera() {
+      this.cameraList.forEach((v) =>
+        v.stream.getTracks().forEach((t) => t.stop())
+      );
+      this.cameraList = [];
     },
     leave() {
       this.videoList.forEach((v) =>
