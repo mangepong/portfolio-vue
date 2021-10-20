@@ -215,7 +215,9 @@ export default {
       this.cameraList.forEach((v) => {
           if(v.id == this.cameraID) {
             v.stream.getTracks().forEach((t) => t.stop())
-            console.log(this.cameraList[x])
+            // console.log(this.cameraList[x])
+            console.log("index", x)
+            console.log(this.cameraID)
             this.cameraList.splice(x, 1)
           }
           x+=1;
