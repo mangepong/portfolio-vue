@@ -213,7 +213,7 @@ export default {
     stopCamera() {
       let x = 0;
       this.cameraList.forEach((v) => {
-          if(v.id == this.cameraID) {
+          if(v.isLocal) {
             v.stream.getTracks().forEach((t) => t.stop())
             // console.log(this.cameraList[x])
             console.log("index", x)
