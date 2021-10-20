@@ -120,7 +120,7 @@ export default {
       // const localStream = await navigator.mediaDevices.getUserMedia(constraints);
       // this.log('opened', localStream);
       // this.joinedRoom(localStream, true);
-      that.$emit("joined-room", stream.id);
+      that.$emit("joined-room");
       this.signalClient.once("discover", (discoveryData) => {
         that.log("discovered", discoveryData);
         async function connectToPeer(peerID) {
