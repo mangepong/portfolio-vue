@@ -52,7 +52,7 @@ export default {
       canvas: null,
       socket: null,
       cameraList: [],
-      cameraID: null
+      cameraID: null,
     };
   },
   props: {
@@ -62,8 +62,8 @@ export default {
     },
     socketURL: {
       type: String,
-      default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
-      //default: 'https://localhost:3000'
+      // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
+      default: "http://localhost:1337",
       //default: 'https://192.168.1.201:3000'
     },
     cameraHeight: {
@@ -102,20 +102,33 @@ export default {
     },
     muted: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   watch: {},
   mounted() {},
+  created() {
+    this.socket = io(this.socketURL);
+    this.signalClient = new SimpleSignalClient(this.socket);
+
+    this.signalClient.on("hello", (data) => {
+      console.log(data)
+      console.log("det funkar!")
+    });
+  },
   methods: {
+    test() {
+      console.log("testar")
+      this.signalClient.emit("stop-camera", "hahah testar lite!")
+    },
     async join() {
       var that = this;
       this.log("join");
-      this.socket = io(this.socketURL, {
-        rejectUnauthorized: false,
-        transports: ["websocket"],
-      });
-      this.signalClient = new SimpleSignalClient(this.socket);
+      // this.socket = io(this.socketURL, {
+      //   rejectUnauthorized: false,
+      //   transports: ["websocket"],
+      // });
+      // this.signalClient = new SimpleSignalClient(this.socket);
       let constraints = {
         video: that.enableVideo,
         audio: that.enableAudio,
@@ -213,16 +226,17 @@ export default {
     stopCamera() {
       let x = 0;
       this.cameraList.forEach((v) => {
-          if(v.isLocal) {
-            v.stream.getTracks().forEach((t) => t.stop())
-            // console.log(this.cameraList[x])
-            console.log("index", x)
-            console.log(this.cameraID)
-            this.cameraList.splice(x, 1)
-          }
-          x+=1;
+        if (v.isLocal) {
+          v.stream.getTracks().forEach((t) => t.stop());
+          // console.log(this.cameraList[x])
+          console.log("index", x);
+          console.log(this.cameraID);
+          this.cameraList.splice(x, 1);
+          // TODO, skapen en socket server och testa detta!
+          // this.socket.emit("stop-camera", this.cameraID)
         }
-      );
+        x += 1;
+      });
     },
     async startCamera() {
       let constraints = {

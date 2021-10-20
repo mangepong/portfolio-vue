@@ -48,6 +48,13 @@
             >
               Camera
             </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="test"
+            >
+              Test
+            </button>
             <v-container class="px-0" fluid>
               <v-switch
                 v-model="muted"
@@ -84,6 +91,9 @@ export default {
     };
   },
   methods: {
+    test() {
+      this.$refs.p2p.test();
+    },
     toggleCamera() {
       let camera = document.getElementsByClassName("camera-item");
       console.log(camera)
