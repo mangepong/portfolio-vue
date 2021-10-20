@@ -131,7 +131,7 @@ export default {
               that.roomId,
               that.peerOptions
             );
-            that.videoList.forEach((v) => {
+            that.camera.forEach((v) => {
               if (v.isLocal) {
                 that.onPeer(peer, v.stream);
               }
