@@ -120,6 +120,7 @@ export default {
       // const localStream = await navigator.mediaDevices.getUserMedia(constraints);
       // this.log('opened', localStream);
       // this.joinedRoom(localStream, true);
+      that.$emit("joined-room", stream.id);
       this.signalClient.once("discover", (discoveryData) => {
         that.log("discovered", discoveryData);
         async function connectToPeer(peerID) {
@@ -213,7 +214,6 @@ export default {
           }
         }
       }, 500);
-      that.$emit("joined-room", stream.id);
     },
     joinedRoomCamera(stream, isLocal) {
       var that = this;
@@ -237,7 +237,7 @@ export default {
           }
         }
       }, 500);
-      that.$emit("joined-room", stream.id);
+      // that.$emit("joined-room", stream.id);
     },
     cameraOff(tracks) {
       tracks.forEach((track) => track.stop());
