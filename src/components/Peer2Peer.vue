@@ -117,10 +117,9 @@ export default {
       if (that.deviceId && that.enableVideo) {
         constraints.video = { deviceId: { exact: that.deviceId } };
       }
-      // const localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      // this.log('opened', localStream);
-      // this.joinedRoom(localStream, true);
-      that.$emit("joined-room");
+      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.log('opened', localStream);
+      this.joinedRoomCamera(localStream, true);
       this.signalClient.once("discover", (discoveryData) => {
         that.log("discovered", discoveryData);
         async function connectToPeer(peerID) {
@@ -157,19 +156,23 @@ export default {
       this.signalClient.discover(that.roomId);
     },
     async startCamera() {
-      let constraints = {
-        video: this.enableVideo,
-        audio: this.enableAudio,
-      };
-      if (this.deviceId && this.enableVideo) {
-        constraints.video = { deviceId: { exact: this.deviceId } };
+      if (this.camera.length < 1) {
+        let constraints = {
+          video: this.enableVideo,
+          audio: this.enableAudio,
+        };
+        if (this.deviceId && this.enableVideo) {
+          constraints.video = { deviceId: { exact: this.deviceId } };
+        }
+  
+        const localStream = await navigator.mediaDevices.getUserMedia(
+          constraints
+        );
+        this.log("opened", localStream);
+        this.joinedRoomCamera(localStream, true);
+      } else {
+        console.log("redan startad");
       }
-
-      const localStream = await navigator.mediaDevices.getUserMedia(
-        constraints
-      );
-      this.log("opened", localStream);
-      this.joinedRoomCamera(localStream, true);
     },
     onPeer(peer, localStream) {
       var that = this;
@@ -237,7 +240,7 @@ export default {
           }
         }
       }, 500);
-      // that.$emit("joined-room", stream.id);
+      that.$emit("joined-room", stream.id);
     },
     cameraOff(tracks) {
       tracks.forEach((track) => track.stop());

@@ -71,7 +71,7 @@ export default {
     return {
       img: null,
       roomId: "public-room-v2",
-      cameraActive: false,
+      cameraActive: true,
     };
   },
   methods: {
@@ -89,9 +89,9 @@ export default {
     },
     onCamera() {
       console.log(this.cameraActive);
+      const video = document.querySelector("video");
       if (this.cameraActive) {
         this.cameraActive = !this.cameraActive;
-        const video = document.querySelector("video");
         const mediaStream = video.srcObject;
         const tracks = mediaStream.getTracks();
         this.$refs.p2p.cameraOff(tracks);
