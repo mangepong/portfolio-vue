@@ -69,8 +69,8 @@ export default {
     socketURL: {
       type: String,
       // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
-      default: "http://localhost:1337",
-      default: 'https://vue-streaming-server.herokuapp.com:54351'
+      // default: "http://localhost:1337",
+      default: 'http://vue-streaming-server.herokuapp.com'
     },
     cameraHeight: {
       type: [Number, String],
