@@ -132,6 +132,7 @@ export default {
       const localStream = await navigator.mediaDevices.getUserMedia(
         constraints
       );
+      console.log("LOCAL STREAM", localStream);
       this.log("opened", localStream);
       this.joinedRoom(localStream, true);
       this.signalClient.once("discover", (discoveryData) => {
