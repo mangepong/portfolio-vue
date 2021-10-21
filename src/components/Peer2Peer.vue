@@ -70,7 +70,7 @@ export default {
       type: String,
       // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
       // default: "http://localhost:1337",
-      default: 'http://vue-streaming-server.herokuapp.com'
+      default: "http://vue-streaming-server.herokuapp.com",
     },
     cameraHeight: {
       type: [Number, String],
@@ -129,12 +129,55 @@ export default {
       if (that.deviceId && that.enableVideo) {
         constraints.video = { deviceId: { exact: that.deviceId } };
       }
-      const localStream = await navigator.mediaDevices.getUserMedia(
-        constraints
-      );
-      console.log("LOCAL STREAM", localStream);
-      this.log("opened", localStream);
-      this.joinedRoom(localStream, true);
+      try {
+        const localStream = await navigator.mediaDevices.getUserMedia(
+          constraints
+        );
+        console.log("LOCAL STREAM", localStream);
+        this.log("opened", localStream);
+        this.joinedRoom(localStream, true);
+        this.signalClient.once("discover", (discoveryData) => {
+          that.log("discovered", discoveryData);
+          async function connectToPeer(peerID) {
+            if (peerID == that.socket.id) return;
+            try {
+              that.log("Connecting to peer");
+              const { peer } = await that.signalClient.connect(
+                peerID,
+                that.roomId,
+                that.peerOptions
+              );
+              that.cameraList.forEach((v) => {
+                if (v.isLocal) {
+                  that.onPeer(peer, v.stream);
+                }
+              });
+            } catch (e) {
+              that.log("Error connecting to peer");
+            }
+          }
+          discoveryData.peers.forEach((peerID) => connectToPeer(peerID));
+          that.$emit("opened-room", that.roomId);
+        });
+        this.signalClient.on("request", async (request) => {
+          that.log("requested", request);
+          const { peer } = await request.accept({}, that.peerOptions);
+          that.log("accepted", peer);
+          if (that.cameraList.length > 0) {
+            that.cameraList.forEach((v) => {
+              if (v.isLocal) {
+                that.onPeer(peer, v.stream);
+              }
+            });
+          }
+        });
+        this.signalClient.discover(that.roomId);
+      } catch {
+        this.noCam();
+        console.log("RIP");
+      }
+    },
+    noCam() {
       this.signalClient.once("discover", (discoveryData) => {
         that.log("discovered", discoveryData);
         async function connectToPeer(peerID) {
@@ -158,19 +201,6 @@ export default {
         discoveryData.peers.forEach((peerID) => connectToPeer(peerID));
         that.$emit("opened-room", that.roomId);
       });
-      this.signalClient.on("request", async (request) => {
-        that.log("requested", request);
-        const { peer } = await request.accept({}, that.peerOptions);
-        that.log("accepted", peer);
-        if (that.cameraList.length > 0) {
-          that.cameraList.forEach((v) => {
-            if (v.isLocal) {
-              that.onPeer(peer, v.stream);
-            }
-          });
-        }
-      });
-      this.signalClient.discover(that.roomId);
     },
     onPeer(peer, localStream) {
       var that = this;
@@ -181,7 +211,7 @@ export default {
           const response = await this.$http.get(this.socketURL + "/getscreen");
           console.log(response.data);
           if (response.data.includes(remoteStream.id)) {
-            console.log("SCREEEEEEEEEEEEEEEEEN")
+            console.log("SCREEEEEEEEEEEEEEEEEN");
             this.onPeerScreen(peer, remoteStream);
           } else {
             that.joinedRoom(remoteStream, false);
@@ -209,7 +239,7 @@ export default {
 
       that.joinedRoomScreen(remoteStream, false);
       peer.on("close", () => {
-        console.log("CLOSE")
+        console.log("CLOSE");
         var newList = [];
         that.videoList.forEach(function(item) {
           if (item.id !== remoteStream.id) {
