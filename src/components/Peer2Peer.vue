@@ -178,6 +178,7 @@ export default {
       }
     },
     noCam() {
+      var that = this;
       this.signalClient.once("discover", (discoveryData) => {
         that.log("discovered", discoveryData);
         async function connectToPeer(peerID) {
