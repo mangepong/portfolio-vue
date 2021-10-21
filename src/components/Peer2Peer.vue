@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div class="row">
+      <div class="col-md-12 my-3">
+        <h2>Room ID: {{ roomId }}</h2>
+      </div>
+    </div>
     <div class="camera-list">
       <div
         v-for="item in cameraList"
@@ -29,7 +34,7 @@
           autoplay
           playsinline
           ref="videos"
-          :height="cameraHeight"
+          :height="600"
           :muted="item.muted"
           :id="item.id"
         ></video>
@@ -173,6 +178,27 @@ export default {
         that.joinedRoom(remoteStream, false);
         peer.on("close", () => {
           var newList = [];
+          that.cameraList.forEach(function(item) {
+            if (item.id !== remoteStream.id) {
+              newList.push(item);
+            }
+          });
+          that.cameraList = newList;
+          that.$emit("left-room", remoteStream.id);
+        });
+        peer.on("error", (err) => {
+          that.log("peer error ", err);
+        });
+      });
+    },
+    onPeerScreen(peer, localStream) {
+      var that = this;
+      that.log("onPeer");
+      peer.addStream(localStream);
+      peer.on("stream", (remoteStream) => {
+        that.joinedRoom(remoteStream, false);
+        peer.on("close", () => {
+          var newList = [];
           that.videoList.forEach(function(item) {
             if (item.id !== remoteStream.id) {
               newList.push(item);
@@ -185,6 +211,32 @@ export default {
           that.log("peer error ", err);
         });
       });
+    },
+    joinedRoomScreen(stream, isLocal) {
+      var that = this;
+      let found = that.videoList.find((video) => {
+        return video.id === stream.id;
+      });
+      if (found === undefined) {
+        let video = {
+          id: stream.id,
+          muted: this.muted,
+          stream: stream,
+          isLocal: isLocal,
+        };
+        // this.cameraID = stream.id;
+        that.videoList.push(video);
+        // this.activeCamera = true;
+      }
+      setTimeout(function() {
+        for (var i = 0, len = that.$refs.videos.length; i < len; i++) {
+          if (that.$refs.videos[i].id === stream.id) {
+            that.$refs.videos[i].srcObject = stream;
+            break;
+          }
+        }
+      }, 500);
+      that.$emit("joined-room", stream.id);
     },
     joinedRoom(stream, isLocal) {
       var that = this;
@@ -282,7 +334,7 @@ export default {
           video: true,
           audio: true,
         });
-        this.joinedRoom(screenStream, true);
+        this.joinedRoomScreen(screenStream, true);
         that.$emit("share-started", screenStream.id);
         that.signalClient.peers().forEach((p) => that.onPeer(p, screenStream));
       } catch (e) {
@@ -300,19 +352,36 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style>
 .video-list {
   background: whitesmoke;
   height: auto;
   display: flex;
+  width: 70%;
   flex-direction: row;
-  justify-content: center;
+  /* justify-content: center; */
   flex-wrap: wrap;
 }
 .video-list div {
   padding: 0px;
 }
 .video-item {
+  background: #c5c4c4;
+  display: inline-block;
+}
+
+.camera-list {
+  height: auto;
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.camera-list div {
+  padding: 0px;
+}
+.camera-item {
   background: #c5c4c4;
   display: inline-block;
 }
