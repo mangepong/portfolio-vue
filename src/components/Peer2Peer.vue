@@ -343,7 +343,7 @@ export default {
         });
         this.joinedRoomScreen(screenStream, true);
         that.$emit("share-started", screenStream.id);
-        that.signalClient.peers().forEach((p) => that.onPeer(p, screenStream));
+        that.signalClient.peers().forEach((p) => that.onPeerScreen(p, screenStream));
       } catch (e) {
         that.log("Media error: " + JSON.stringify(e));
       }
