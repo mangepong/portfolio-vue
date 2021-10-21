@@ -176,6 +176,7 @@ export default {
       peer.addStream(localStream);
       peer.on("stream", (remoteStream) => {
         console.log("remote stream!", remoteStream);
+        console.log(remoteStream.getTracks())
         that.joinedRoom(remoteStream, false);
         peer.on("close", () => {
           var newList = [];
