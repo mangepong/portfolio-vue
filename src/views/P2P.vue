@@ -116,7 +116,7 @@ export default {
     },
     onLeave() {
       this.$refs.p2p.leave();
-      this.$router.push('Home')
+      this.$router.push('/')
     },
     onShareScreen() {
       this.img = this.$refs.p2p.shareScreen();
