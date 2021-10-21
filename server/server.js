@@ -6,17 +6,32 @@ server = require('http').createServer(app);
 
 const io = require('socket.io')(server, { cors: true, origins: false });
 const signalServer = require('simple-signal-server')(io)
+var cors = require('cors')
+var bodyParser = require('body-parser')
 const port = process.env.PORT || 1337;
 const rooms = new Map()
-
+const screenIDs = [];
 server.listen(port, () => {
    log('Lobby server running on port ' + port);
 });
 
+app.use(cors())
+app.use(bodyParser.json())
 app.get('/', function (req, res) {
    var sum = 0;
    rooms.forEach((v, k) => sum = sum + v.size);
    res.send('Lobby server<br/>rooms: ' + rooms.size + '<br/>members: ' + sum);
+});
+
+app.post('/setscreen', function (req, res) {
+   console.log(req.body.id)
+   screenIDs.push(req.body.id);
+   console.log(screenIDs);
+});
+
+app.get('/getscreen', function (req, res) {
+   console.log(screenIDs);
+   res.send(screenIDs);
 });
 
 signalServer.on('discover', (request) => {

@@ -58,6 +58,7 @@ export default {
       socket: null,
       cameraList: [],
       cameraID: null,
+      screensIDs: [],
     };
   },
   props: {
@@ -67,8 +68,8 @@ export default {
     },
     socketURL: {
       type: String,
-      default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
-      //default: 'https://localhost:3000'
+      // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
+      default: "http://localhost:1337",
       //default: 'https://192.168.1.201:3000'
     },
     cameraHeight: {
@@ -93,7 +94,7 @@ export default {
     },
     enableLogs: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     peerOptions: {
       type: Object, // NOTE: use these options: https://github.com/feross/simple-peer
@@ -174,49 +175,51 @@ export default {
       var that = this;
       that.log("onPeer");
       peer.addStream(localStream);
-      peer.on("stream", (remoteStream) => {
-        let track = remoteStream.getTracks();
-        let settings = track[1].getSettings()
-        console.log("SETTINGS", settings)
-        console.log("remote stream Camera!", remoteStream);
-        console.log(remoteStream.getTracks())
-        that.joinedRoom(remoteStream, false);
-        peer.on("close", () => {
-          var newList = [];
-          that.cameraList.forEach(function(item) {
-            if (item.id !== remoteStream.id) {
-              newList.push(item);
-            }
-          });
-          that.cameraList = newList;
-          that.$emit("left-room", remoteStream.id);
-        });
-        peer.on("error", (err) => {
-          that.log("peer error ", err);
-        });
+      peer.on("stream", async (remoteStream) => {
+        try {
+          const response = await this.$http.get(this.socketURL + "/getscreen");
+          console.log(response.data);
+          if (response.data.includes(remoteStream.id)) {
+            console.log("SCREEEEEEEEEEEEEEEEEN")
+            this.onPeerScreen(peer, remoteStream);
+          } else {
+            that.joinedRoom(remoteStream, false);
+            peer.on("close", () => {
+              var newList = [];
+              that.cameraList.forEach(function(item) {
+                if (item.id !== remoteStream.id) {
+                  newList.push(item);
+                }
+              });
+              that.cameraList = newList;
+              that.$emit("left-room", remoteStream.id);
+            });
+            peer.on("error", (err) => {
+              that.log("peer error ", err);
+            });
+          }
+        } catch (error) {
+          console.log(error);
+        }
       });
     },
-    onPeerScreen(peer, localStream) {
+    onPeerScreen(peer, remoteStream) {
       var that = this;
-      that.log("onPeer");
-      peer.addStream(localStream);
-      peer.on("stream", (remoteStream) => {
-        console.log("remote stream SCREEN!", remoteStream);
-        console.log("remote stream SCREEN! TRACKS",remoteStream.getTracks())
-        that.joinedRoom(remoteStream, false);
-        peer.on("close", () => {
-          var newList = [];
-          that.videoList.forEach(function(item) {
-            if (item.id !== remoteStream.id) {
-              newList.push(item);
-            }
-          });
-          that.videoList = newList;
-          that.$emit("left-room", remoteStream.id);
+
+      that.joinedRoomScreen(remoteStream, false);
+      peer.on("close", () => {
+        console.log("CLOSE")
+        var newList = [];
+        that.videoList.forEach(function(item) {
+          if (item.id !== remoteStream.id) {
+            newList.push(item);
+          }
         });
-        peer.on("error", (err) => {
-          that.log("peer error ", err);
-        });
+        that.videoList = newList;
+        that.$emit("left-room", remoteStream.id);
+      });
+      peer.on("error", (err) => {
+        that.log("peer error ", err);
       });
     },
     joinedRoomScreen(stream, isLocal) {
@@ -231,9 +234,7 @@ export default {
           stream: stream,
           isLocal: isLocal,
         };
-        // this.cameraID = stream.id;
         that.videoList.push(video);
-        // this.activeCamera = true;
       }
       setTimeout(function() {
         for (var i = 0, len = that.$refs.videos.length; i < len; i++) {
@@ -276,7 +277,6 @@ export default {
       this.cameraList.forEach((v) => {
         if (v.isLocal) {
           v.stream.getTracks().forEach((t) => t.stop());
-          // console.log(this.cameraList[x])
           console.log("index", x);
           console.log(this.cameraID);
           this.cameraList.splice(x, 1);
@@ -331,6 +331,7 @@ export default {
       return canvas;
     },
     async shareScreen() {
+      console.log("asdasdasdasd");
       var that = this;
       if (navigator.mediaDevices == undefined) {
         that.log("Error: https is required to load cameras");
@@ -341,9 +342,15 @@ export default {
           video: true,
           audio: true,
         });
+
+        this.screensIDs.push(screenStream.id);
         this.joinedRoomScreen(screenStream, true);
         that.$emit("share-started", screenStream.id);
-        that.signalClient.peers().forEach((p) => that.onPeerScreen(p, screenStream));
+        that.signalClient.peers().forEach((p) => that.onPeer(p, screenStream));
+        console.log("skickar", screenStream.id);
+        await this.$http.post(this.socketURL + "/setscreen", {
+          id: screenStream.id,
+        });
       } catch (e) {
         that.log("Media error: " + JSON.stringify(e));
       }

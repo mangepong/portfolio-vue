@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "axois": "0.0.1-security",
     "core-js": "^3.6.5",
     "express": "^4.17.1",
     "flvplayer": "^1.1.8",
