@@ -62,8 +62,8 @@ export default {
     },
     socketURL: {
       type: String,
-      // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
-      default: "http://localhost:1337",
+      default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
+      // default: "http://localhost:1337",
       //default: 'https://192.168.1.201:3000'
     },
     cameraHeight: {
@@ -152,11 +152,13 @@ export default {
               that.roomId,
               that.peerOptions
             );
-            that.cameraList.forEach((v) => {
-              if (v.isLocal) {
-                that.onPeer(peer, v.stream);
-              }
-            });
+            if (that.cameraList.length > 0) {
+              that.cameraList.forEach((v) => {
+                if (v.isLocal) {
+                  that.onPeer(peer, v.stream);
+                }
+              });
+            }
           } catch (e) {
             that.log("Error connecting to peer");
           }
@@ -198,30 +200,34 @@ export default {
       });
     },
     joinedRoom(stream, isLocal) {
-      var that = this;
-      let found = that.cameraList.find((video) => {
-        return video.id === stream.id;
-      });
-      if (found === undefined) {
-        let video = {
-          id: stream.id,
-          muted: this.muted,
-          stream: stream,
-          isLocal: isLocal,
-        };
-        this.cameraID = stream.id;
-        that.cameraList.push(video);
-        this.activeCamera = true;
-      }
-      setTimeout(function() {
-        for (var i = 0, len = that.$refs.cameras.length; i < len; i++) {
-          if (that.$refs.cameras[i].id === stream.id) {
-            that.$refs.cameras[i].srcObject = stream;
-            break;
-          }
+      try {
+        var that = this;
+        let found = that.cameraList.find((video) => {
+          return video.id === stream.id;
+        });
+        if (found === undefined) {
+          let video = {
+            id: stream.id,
+            muted: this.muted,
+            stream: stream,
+            isLocal: isLocal,
+          };
+          this.cameraID = stream.id;
+          that.cameraList.push(video);
+          this.activeCamera = true;
         }
-      }, 500);
-      that.$emit("joined-room", stream.id);
+        setTimeout(function() {
+          for (var i = 0, len = that.$refs.cameras.length; i < len; i++) {
+            if (that.$refs.cameras[i].id === stream.id) {
+              that.$refs.cameras[i].srcObject = stream;
+              break;
+            }
+          }
+        }, 500);
+        that.$emit("joined-room", stream.id);
+      } catch(e) {
+        that.$emit("joined-room", "no camera");
+      }
     },
     stopCamera() {
       let x = 0;
