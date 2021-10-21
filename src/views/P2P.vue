@@ -2,11 +2,22 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12 my-3">
-        <h2>Room</h2>
-        <input v-model="roomId" />
+        <h2>Create Room/Join Room</h2>
+        <!-- <input v-model="roomId" /> -->
       </div>
     </div>
-    <div class="row">
+    <div>
+      <v-form @submit.prevent="togglePopUp">
+        <v-text-field
+          v-model="roomId"
+          label="Type an existing room id or create one"
+          hide-details="auto"
+          ref="popUp"
+          v-if="popUp"
+        ></v-text-field>
+      </v-form>
+    </div>
+    <div class="row" v-if="!popUp">
       <div class="col-md-12">
         <div class="">
           <p2p
@@ -25,9 +36,9 @@
         </div>
         <div class="row">
           <div class="col-md-12 my-3">
-            <button type="button" class="btn btn-primary" @click="onJoin">
+            <!-- <button type="button" class="btn btn-primary" @click="onJoin">
               Join
-            </button>
+            </button> -->
             <button type="button" class="btn btn-primary" @click="onLeave">
               Leave
             </button>
@@ -41,25 +52,14 @@
             >
               Share Screen
             </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="toggleCamera"
-            >
+            <button type="button" class="btn btn-primary" @click="toggleCamera">
               Camera
             </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="test"
-            >
+            <button type="button" class="btn btn-primary" @click="test">
               Test
             </button>
             <v-container class="px-0" fluid>
-              <v-switch
-                v-model="muted"
-                :label="`Mic: ${mic()}`"
-              ></v-switch>
+              <v-switch v-model="muted" :label="`Mic: ${mic()}`"></v-switch>
             </v-container>
           </div>
         </div>
@@ -88,27 +88,34 @@ export default {
       roomId: "public-room-v2",
       muted: false,
       activeCamera: true,
+      popUp: true,
     };
   },
   methods: {
+    togglePopUp() {
+      this.popUp = !this.popUp;
+      setTimeout(()=> {
+        this.$refs.p2p.join();
+      }, 100)
+    },
     test() {
       this.$refs.p2p.test();
     },
     toggleCamera() {
       let camera = document.getElementsByClassName("camera-item");
-      console.log(camera)
+      console.log(camera);
       if (camera.length > 0 && this.activeCamera) {
-        console.log("PÅ")
-        this.$refs.p2p.stopCamera()
-        this.activeCamera = !this.activeCamera
+        console.log("PÅ");
+        this.$refs.p2p.stopCamera();
+        this.activeCamera = !this.activeCamera;
       } else {
-        console.log("AV")
-        this.$refs.p2p.startCamera()
-        this.activeCamera = !this.activeCamera
+        console.log("AV");
+        this.$refs.p2p.startCamera();
+        this.activeCamera = !this.activeCamera;
       }
     },
     mic() {
-      return this.muted ? "Off" : "On"
+      return this.muted ? "Off" : "On";
     },
     onCapture() {
       this.img = this.$refs.p2p.capture();

@@ -52,7 +52,7 @@ export default {
       canvas: null,
       socket: null,
       cameraList: [],
-      cameraID: null
+      cameraID: null,
     };
   },
   props: {
@@ -102,8 +102,8 @@ export default {
     },
     muted: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   watch: {},
   mounted() {},
@@ -155,11 +155,13 @@ export default {
         that.log("requested", request);
         const { peer } = await request.accept({}, that.peerOptions);
         that.log("accepted", peer);
-        that.cameraList.forEach((v) => {
-          if (v.isLocal) {
-            that.onPeer(peer, v.stream);
-          }
-        });
+        if (that.cameraList.length > 0) {
+          that.cameraList.forEach((v) => {
+            if (v.isLocal) {
+              that.onPeer(peer, v.stream);
+            }
+          });
+        }
       });
       this.signalClient.discover(that.roomId);
     },
@@ -213,16 +215,15 @@ export default {
     stopCamera() {
       let x = 0;
       this.cameraList.forEach((v) => {
-          if(v.isLocal) {
-            v.stream.getTracks().forEach((t) => t.stop())
-            // console.log(this.cameraList[x])
-            console.log("index", x)
-            console.log(this.cameraID)
-            this.cameraList.splice(x, 1)
-          }
-          x+=1;
+        if (v.isLocal) {
+          v.stream.getTracks().forEach((t) => t.stop());
+          // console.log(this.cameraList[x])
+          console.log("index", x);
+          console.log(this.cameraID);
+          this.cameraList.splice(x, 1);
         }
-      );
+        x += 1;
+      });
     },
     async startCamera() {
       let constraints = {
