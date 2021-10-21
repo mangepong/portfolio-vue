@@ -175,7 +175,7 @@ export default {
       that.log("onPeer");
       peer.addStream(localStream);
       peer.on("stream", (remoteStream) => {
-        console.log("remote stream!", remoteStream);
+        console.log("remote stream Camera!", remoteStream);
         console.log(remoteStream.getTracks())
         that.joinedRoom(remoteStream, false);
         peer.on("close", () => {
@@ -198,6 +198,8 @@ export default {
       that.log("onPeer");
       peer.addStream(localStream);
       peer.on("stream", (remoteStream) => {
+        console.log("remote stream SCREEN!", remoteStream);
+        console.log("remote stream SCREEN! TRACKS",remoteStream.getTracks())
         that.joinedRoom(remoteStream, false);
         peer.on("close", () => {
           var newList = [];
