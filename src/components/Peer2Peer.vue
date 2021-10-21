@@ -175,6 +175,9 @@ export default {
       that.log("onPeer");
       peer.addStream(localStream);
       peer.on("stream", (remoteStream) => {
+        let track = remoteStream.getTracks();
+        let settings = track[1].getSettings()
+        console.log("SETTINGS", settings)
         console.log("remote stream Camera!", remoteStream);
         console.log(remoteStream.getTracks())
         that.joinedRoom(remoteStream, false);
