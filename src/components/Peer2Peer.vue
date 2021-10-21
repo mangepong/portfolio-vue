@@ -70,7 +70,7 @@ export default {
       type: String,
       // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
       default: "http://localhost:1337",
-      //default: 'https://192.168.1.201:3000'
+      default: 'https://vue-streaming-server.herokuapp.com:54351'
     },
     cameraHeight: {
       type: [Number, String],
