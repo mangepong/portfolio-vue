@@ -182,7 +182,7 @@ export default {
       this.signalClient.once("discover", (discoveryData) => {
         that.log("discovered", discoveryData);
         async function connectToPeer(peerID) {
-          if (peerID == that.socket.id) return;
+          // if (peerID == that.socket.id) return;
           try {
             that.log("Connecting to peer");
             const { peer } = await that.signalClient.connect(
