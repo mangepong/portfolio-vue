@@ -191,7 +191,7 @@ export default {
               that.peerOptions
             );
 
-            that.onPeer(peer, none);
+            that.onPeer(peer, undefined);
             // that.cameraList.forEach((v) => {
             //   if (v.isLocal) {
             //     that.onPeer(peer, v.stream);
