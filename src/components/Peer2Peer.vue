@@ -69,8 +69,8 @@ export default {
     socketURL: {
       type: String,
       // default: "https://weston-vue-webrtc-lobby.azurewebsites.net",
-      // default: "http://localhost:1337",
-      default: "https://vue-streaming-server.herokuapp.com",
+      default: "http://localhost:1337",
+      // default: "https://vue-streaming-server.herokuapp.com",
     },
     cameraHeight: {
       type: [Number, String],
@@ -190,11 +190,13 @@ export default {
               that.roomId,
               that.peerOptions
             );
-            that.cameraList.forEach((v) => {
-              if (v.isLocal) {
-                that.onPeer(peer, v.stream);
-              }
-            });
+
+            that.onPeer(peer, none);
+            // that.cameraList.forEach((v) => {
+            //   if (v.isLocal) {
+            //     that.onPeer(peer, v.stream);
+            //   }
+            // });
           } catch (e) {
             that.log("Error connecting to peer");
           }
@@ -206,34 +208,65 @@ export default {
     onPeer(peer, localStream) {
       var that = this;
       that.log("onPeer");
-      peer.addStream(localStream);
-      peer.on("stream", async (remoteStream) => {
-        try {
-          const response = await this.$http.get(this.socketURL + "/getscreen");
-          console.log(response.data);
-          if (response.data.includes(remoteStream.id)) {
-            console.log("SCREEEEEEEEEEEEEEEEEN");
-            this.onPeerScreen(peer, remoteStream);
-          } else {
-            that.joinedRoom(remoteStream, false);
-            peer.on("close", () => {
-              var newList = [];
-              that.cameraList.forEach(function(item) {
-                if (item.id !== remoteStream.id) {
-                  newList.push(item);
-                }
+      if (!localStream) {
+        // Om ingen kamera
+        peer.on("stream", async (remoteStream) => {
+          try {
+            const response = await this.$http.get(this.socketURL + "/getscreen");
+            console.log(response.data);
+            if (response.data.includes(remoteStream.id)) {
+              console.log("SCREEEEEEEEEEEEEEEEEN");
+              this.onPeerScreen(peer, remoteStream);
+            } else {
+              that.joinedRoom(remoteStream, false);
+              peer.on("close", () => {
+                var newList = [];
+                that.cameraList.forEach(function(item) {
+                  if (item.id !== remoteStream.id) {
+                    newList.push(item);
+                  }
+                });
+                that.cameraList = newList;
+                that.$emit("left-room", remoteStream.id);
               });
-              that.cameraList = newList;
-              that.$emit("left-room", remoteStream.id);
-            });
-            peer.on("error", (err) => {
-              that.log("peer error ", err);
-            });
+              peer.on("error", (err) => {
+                that.log("peer error ", err);
+              });
+            }
+          } catch (error) {
+            console.log(error);
           }
-        } catch (error) {
-          console.log(error);
-        }
-      });
+        });
+      } else {
+        peer.addStream(localStream);
+        peer.on("stream", async (remoteStream) => {
+          try {
+            const response = await this.$http.get(this.socketURL + "/getscreen");
+            console.log(response.data);
+            if (response.data.includes(remoteStream.id)) {
+              console.log("SCREEEEEEEEEEEEEEEEEN");
+              this.onPeerScreen(peer, remoteStream);
+            } else {
+              that.joinedRoom(remoteStream, false);
+              peer.on("close", () => {
+                var newList = [];
+                that.cameraList.forEach(function(item) {
+                  if (item.id !== remoteStream.id) {
+                    newList.push(item);
+                  }
+                });
+                that.cameraList = newList;
+                that.$emit("left-room", remoteStream.id);
+              });
+              peer.on("error", (err) => {
+                that.log("peer error ", err);
+              });
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        });
+      }
     },
     onPeerScreen(peer, remoteStream) {
       var that = this;
